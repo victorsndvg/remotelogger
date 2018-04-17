@@ -1,0 +1,15 @@
+Django
+uwsgi
+celery
+celery_singleton
+pika
+gevent
+python-socketio
+social-auth-app-django
+#channels
+#Twisted[tls,http2]
+#daphne
+#gunicorn
+#websockets
+
+
