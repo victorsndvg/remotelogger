@@ -3,7 +3,10 @@ uwsgi
 celery
 celery_singleton
 pika
-gevent
+gevent==1.2.2
+gevent-websocket
+#greenlet
+python-engineio
 python-socketio
 social-auth-app-django
 #channels

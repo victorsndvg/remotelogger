@@ -2,10 +2,10 @@
 
 import logging
 import pika
-
-#from remotelogger.sio import sio
-#import socketio
-#from remotelogger.wsgi import application
+import socketio
+from remotelogger.sio import sio
+from gevent import monkey
+monkey.patch_all()
 
 LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
               '-35s %(lineno) -5d: %(message)s')
@@ -22,9 +22,6 @@ class Consumer(object):
         self._exchange_type = exchange_type
         self._queue = queue
         self._routing_key = routing_key
-#        self._sio = sio 
-#        self._sio = sio = socketio.Server(async_mode='gevent_uwsgi', logger=True)
-#        self._sio.attach(application, socketio_app='logs')
         self.logger = logger
 
     def connect(self):
@@ -125,12 +122,8 @@ class Consumer(object):
 
     def on_message(self, unused_channel, basic_deliver, properties, body):
         self.logger.info('Received message # %s from %s: %s', basic_deliver.delivery_tag, properties.app_id, body)
-#        asyncio.new_event_loop().run_until_complete(self.show_message('ws://10.38.3.108:8080/logs/logs', body))
         self.acknowledge_message(basic_deliver.delivery_tag)
-#        thread = sio.start_background_task(tasks.subscribe(id))
-#        self._sio.emit('my response', {'data': 'A message'}, namespace='/logs/logs')
-#        self.logger.info(body)
-#        self._sio.emit('my response', {'data': str(body)} , namespace='/logs/logs')
+        sio.emit('my response', {'data': body.decode('utf-8')} , namespace='/test')
 
 
     def acknowledge_message(self, delivery_tag):
@@ -175,12 +168,12 @@ class Consumer(object):
 def main():
     logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
     ampq_url = 'amqp://guest:guest@broker:5672/%2F'
-    exchange = 'logs'
-    exchange_type = 'topic'
-    queue = 'logs'
-    routing_key = 'logs'
+    exchange = 'exchange'
+    exchange_type = 'direct'
+    queue = 'queue'
+    routing_key = 'routing_key'
     consumer_tag = 'logs'
-    consumer = Consumer(ampq_url, exchange, exchange_type, queue, routing_key, consumer_tag)
+    consumer = Consumer(ampq_url, exchange, exchange_type, queue, routing_key, logging)
     try:
         consumer.run()
     except KeyboardInterrupt:

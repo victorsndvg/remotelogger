@@ -8,9 +8,14 @@ https://docs.djangoproject.com/en/2.0/howto/deployment/wsgi/
 """
 
 import os
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "remotelogger.settings")
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "remotelogger.settings")
+from socketio import Middleware
+from remotelogger.sio import sio
 
-application = get_wsgi_application()
+#application = get_wsgi_application()
+
+django_app = get_wsgi_application()
+application = Middleware(sio, django_app)

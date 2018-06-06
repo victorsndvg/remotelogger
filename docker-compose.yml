@@ -28,10 +28,6 @@ services:
     build: .
     restart: always
     command: bash -c "python manage.py makemigrations && python manage.py migrate && uwsgi --http :8000 --http-websockets --gevent 1000 --master --ini uwsgi.ini"
-#    command: bash -c "python manage.py makemigrations && python manage.py migrate && uwsgi --http :8000 --http-websockets --gevent 100 --socket :8000 --ini uwsgi.ini"
-#    command: bash -c "python manage.py makemigrations && python manage.py migrate && daphne -b 0.0.0.0 -p 8000 remotelogger.asgi:application" # dont work
-#    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-#    command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn remotelogger.wsgi -b 0.0.0.0:8000"
     depends_on:
 #      - db
       - broker
@@ -78,22 +74,22 @@ services:
     image: "redis:alpine"
     restart: always
 
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    restart: always
-    environment:
-      - REDIS_HOSTS=local:redis:6379
-    ports:
-      - 8081:8081
+#  redis-commander:
+#    image: rediscommander/redis-commander:latest
+#    restart: always
+#    environment:
+#      - REDIS_HOSTS=local:redis:6379
+#    ports:
+#      - 8081:8081
 
-  redmon:
-    image: vieux/redmon
-    command: redmon -r redis://redis:6379
-    restart: always
-    links:
-      - redis
-    ports:
-      - 4567:4567
+#  redmon:
+#    image: vieux/redmon
+#    command: redmon -r redis://redis:6379
+#    restart: always
+#    links:
+#      - redis
+#    ports:
+#         - 4567:4567
 
 
 
