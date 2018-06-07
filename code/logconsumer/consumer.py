@@ -4,29 +4,29 @@ import logging
 import pika
 import socketio
 from remotelogger.sio import sio
-from gevent import monkey
-monkey.patch_all()
+from remotelogger.settings import BROKER_HOST, BROKER_PORT, BROKER_USER, BROKER_PASS
 
 LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
               '-35s %(lineno) -5d: %(message)s')
 
 class Consumer(object):
 
-    def __init__(self, amqp_url, exchange, exchange_type, queue, routing_key, logger):
-        self._connection = None
-        self._channel = None
-        self._closing = False
-        self._timerid = None
-        self._url = amqp_url
-        self._exchange = exchange
+    def __init__(self, exchange, exchange_type, queue, routing_key, logger):
+        self._connection    = None
+        self._channel       = None
+        self._closing       = False
+        self._timerid       = None
+        self._exchange      = exchange
         self._exchange_type = exchange_type
-        self._queue = queue
-        self._routing_key = routing_key
-        self.logger = logger
+        self._queue         = queue
+        self._routing_key   = routing_key
+        self.logger         = logger
 
     def connect(self):
-        self.logger.info('Connecting to %s', self._url)
-        return pika.SelectConnection(pika.URLParameters(self._url),
+        self.logger.info('Connecting to %s', BROKER_HOST)
+        credentials = pika.PlainCredentials(BROKER_USER, BROKER_PASS) 
+        parameters = pika.ConnectionParameters(host=BROKER_HOST, port=int(BROKER_PORT), credentials=credentials, heartbeat_interval=0) 
+        return pika.SelectConnection(parameters,
                                      self.on_connection_open,
                                      stop_ioloop_on_close=False)
 

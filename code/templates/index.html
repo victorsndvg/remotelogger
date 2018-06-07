@@ -1,8 +1,8 @@
 <html>
 <head>
+    <title>RemoteLogger</title>
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'logconsole/css/shell.css' %}">
-    <title>Django + SocketIO Test</title>
     <script type="text/javascript" src="//code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.slim.js"></script>
     <script type="text/javascript" charset="utf-8">
@@ -121,7 +121,7 @@
 <body>
 
     <div class="shell-wrap">
-        <p class="shell-top-bar">{{USER}}@{{LOG}}</p>
+        <p class="shell-top-bar">{{USER}}@{{ROOM}}</p>
         <div class="shell-body">
             <p id="log"></p>
         </div>

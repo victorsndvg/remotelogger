@@ -4,11 +4,12 @@
 
 import os
 import socketio
+from remotelogger.settings import BROKER_URL
 from gevent import monkey
 monkey.patch_all()
 
 basedir = os.path.dirname(os.path.realpath(__file__))
-sio = socketio.Server(client_manager=socketio.KombuManager('amqp://guest:guest@broker:5672//'), logger=True)
+sio = socketio.Server(client_manager=socketio.KombuManager(BROKER_URL), logger=True)
 
 @sio.on('my event', namespace='/test')
 def test_message(sid, message):
