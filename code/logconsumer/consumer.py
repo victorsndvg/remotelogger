@@ -2,8 +2,10 @@
 
 import logging
 import pika
+import json
 import socketio
 from remotelogger.sio import sio
+from remotelogger.mongodb import client
 from remotelogger.settings import BROKER_HOST, BROKER_PORT, BROKER_USER, BROKER_PASS
 
 LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
@@ -20,6 +22,7 @@ class Consumer(object):
         self._exchange_type = exchange_type
         self._queue         = queue
         self._routing_key   = routing_key
+        #self._db            = client[exchange][routing_key]
         self.logger         = logger
 
     def connect(self):
@@ -123,8 +126,8 @@ class Consumer(object):
     def on_message(self, unused_channel, basic_deliver, properties, body):
         self.logger.info('Received message # %s from %s: %s', basic_deliver.delivery_tag, properties.app_id, body)
         self.acknowledge_message(basic_deliver.delivery_tag)
-        sio.emit('my response', {'data': body.decode('utf-8')} , namespace='/test')
-
+        sio.emit('log', {'data': body.decode('utf-8')}, namespace='/'+self._queue)
+        #self._db.insert_one(json.loads(body.decode('utf-8'))).inserted_id
 
     def acknowledge_message(self, delivery_tag):
         self.logger.info('Acknowledging message %s', delivery_tag)
