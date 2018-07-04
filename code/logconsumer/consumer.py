@@ -5,7 +5,7 @@ import pika
 import json
 import socketio
 from remotelogger.sio import sio
-from remotelogger.mongodb import client
+#from remotelogger.mongodb import client
 from remotelogger.settings import BROKER_HOST, BROKER_PORT, BROKER_USER, BROKER_PASS
 
 LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
