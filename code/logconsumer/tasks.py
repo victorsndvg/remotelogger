@@ -19,13 +19,15 @@ def init(sender=None, conf=None, **kwargs):
 
 @app.task(base=Singleton)
 def serve():
-    try:
-        server = RPCServer(BROKER_URL, 'rpc_queue', '', logger)
-        server.register_callback(consume)
-        server.connect()
-        server.consume()
-    except Exception as e:
-        raise e
+    while True:
+        try:
+            server = RPCServer(BROKER_URL, 'rpc_queue', '', logger)
+            server.register_callback(consume)
+            server.connect()
+            server.consume()
+        except Exception as e:
+            logger.info(str(e))
+
 
 @app.task(base=Singleton)
 def consume(exchange, exchange_type, queue, routing_key):
