@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'logconsumer',
+    'logconsole',
 ]
 
 MIDDLEWARE = [
@@ -55,7 +56,7 @@ ROOT_URLCONF = 'remotelogger.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates/'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -120,10 +121,18 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-CELERY_BROKER_URL = 'amqp://guest:guest@broker:5672//'
+BROKER_PROTOCOL='amqp'
+BROKER_HOST='broker'
+BROKER_PORT='5672'
+BROKER_USER='guest'
+BROKER_PASS='guest'
+BROKER_URL=BROKER_PROTOCOL+'://'+BROKER_USER+':'+BROKER_PASS+'@'+BROKER_HOST+':'+BROKER_PORT+'/'
+
+CELERY_BROKER_URL = BROKER_URL
 CELERY_RESULT_BACKEND  = 'redis://redis:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+CELERY_BROKER_HEARTBEAT = 0
 
 CELERY_ROUTES = {
     'logconsumer.tasks.serve': {

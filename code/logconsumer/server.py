@@ -5,8 +5,8 @@ import json
 
 class RPCServer(object):
 
-    def __init__(self, host, queue, exchange, logger):
-        self.host       = host
+    def __init__(self, url, queue, exchange, logger):
+        self.url        = url
         self.queue      = queue
         self.exchange   = exchange
         self.logger     = logger
@@ -16,7 +16,7 @@ class RPCServer(object):
         self.logger.info("RPC Server: Created")
 
     def connect(self):
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.host))
+        self.connection = pika.BlockingConnection(pika.URLParameters(self.url))
         self.channel    = self.connection.channel()
         self.channel.queue_declare(queue=self.queue)
         self.logger.info("RPC Server: Connected")
