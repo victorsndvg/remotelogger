@@ -4,14 +4,21 @@ services:
     image: rabbitmq:3-management
     restart: always
     environment:
-        - RABBITMQ_DEFAULT_USER=guest
-        - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
     ports:
       - "5672:5672"
       - "8080:15672"
 
 #  db:
 #    image: postgres:latest
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=guest
+      - MONGO_INITDB_ROOT_PASSWORD=guest
 
   nginx:
     image: nginx:latest
@@ -31,6 +38,7 @@ services:
     depends_on:
 #      - db
       - broker
+      - mongo
     volumes:
       - ./code:/code
     ports:
@@ -43,6 +51,7 @@ services:
     depends_on:
 #      - db
       - broker
+      - mongo
     volumes:
       - ./code:/code
 
@@ -53,6 +62,7 @@ services:
     depends_on:
 #      - db
       - broker
+      - mongo
     volumes:
       - ./code:/code
 
@@ -69,6 +79,15 @@ services:
     ports:
       - "5555:5555"
     entrypoint: "flower --broker=amqp://guest:guest@broker:5672 --port=5555 --basic_auth=admin:admin"
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=guest
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=guest
 
   redis:
     image: "redis:alpine"
