@@ -1,0 +1,13 @@
+<html>
+<head>
+    <title>RemoteLogger</title>
+</head>
+
+    <body>
+        <ul>
+            {% for job in JOBS %}
+                <li ><a href="{{ request.build_absolute_uri }}{{ object.get_absolute_url }}/{{job}}">{{job}}</a></li>
+            {% endfor %}
+        </ul>
+    </body>
+</html>

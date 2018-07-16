@@ -1,0 +1,13 @@
+<html>
+<head>
+    <title>RemoteLogger</title>
+</head>
+
+    <body>
+        <ul>
+            {% for workflow in WORKFLOWS %}
+                <li ><a href="{{ request.build_absolute_uri }}{{ object.get_absolute_url }}/{{workflow}}">{{workflow}}</a></li>
+            {% endfor %}
+        </ul>
+    </body>
+</html>
