@@ -22,6 +22,7 @@ class Consumer(object):
         self._exchange_type = exchange_type
         self._queue         = queue
         self._routing_key   = routing_key
+        self._topic         = routing_key+'.'+queue
         self._log           = Log(exchange, queue, routing_key, logger)
         self.logger         = logger
         self._log.create()
@@ -96,9 +97,9 @@ class Consumer(object):
         self._channel.queue_declare(self.on_queue_declareok, queue_name)
 
     def on_queue_declareok(self, method_frame):
-        self.logger.info('Binding %s to %s with %s', self._exchange, self._queue, self._routing_key)
+        self.logger.info('Binding %s to %s with %s', self._exchange, self._queue, self._topic)
         self._channel.queue_bind(self.on_bindok, self._queue,
-                                 self._exchange, self._routing_key)
+                                 self._exchange, self._topic)
 
     def on_bindok(self, unused_frame):
         self.logger.info('Queue bound')
