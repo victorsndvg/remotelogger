@@ -8,44 +8,37 @@
             var socket = io.connect('http://' + document.domain + ':' + location.port + '/{{NAMESPACE}}');
 
             socket.on('connect', function() {
-                $('#log').append('<br>Connected');
+                $('#top-bar').append(' | Connected');
             });
             socket.on('disconnect', function() {
-                $('#log').append('<br>Disconnected');
+                $('#top-bar').append(' | Disconnected');
             });
             socket.on('log', function(msg) {
                 var logmsg = JSON.parse(msg.data)
                 $('#log').append('<li class="' + logmsg.severity + '">' + logmsg.string + '</li>');
+                document.getElementById( 'bottom' ).scrollIntoView();
             });
         });
     </script>
     <style>
 .shell-wrap {
-  width: 100%;
-  margin: 100px auto 0 auto;
-  box-shadow: 0 0 30px rgba(0,0,0,0.4);
+  width: 99%;
+  height: 95%;
+  margin: 0;
+  box-shadow: 0 rgba(0,0,0,0.4);
 
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border-radius: 3px;
+
 }
 
 .shell-top-bar {
-  text-align: center;
-  color: #525252;
-  padding: 5px 0;
-  margin: 0;
-  text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
-  font-size: 0.85em;
-  border: 1px solid #CCCCCC;
-  border-bottom: none;
+    text-align: center;
+    color: #525252;
+    margin: 0% 0% 0% 0%;
+    padding: 0% 0% 0% 0%;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+    font-size: 0.85em;
 
-  -webkit-border-top-left-radius: 3px;
-  -webkit-border-top-right-radius: 3px;
-  -moz-border-radius-topleft: 3px;
-  -moz-border-radius-topright: 3px;
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
+
 
   background: #f7f7f7; /* Old browsers */
   background: -moz-linear-gradient(top,  #f7f7f7 0%, #B8B8B8 100%); /* FF3.6+ */
@@ -58,24 +51,22 @@
 }
 
 .shell-body {
-  margin: 0;
-  padding: 5px;
-  list-style: none;
-  background: #141414;
-  color: white;
-  font: 0.8em 'Andale Mono', Consolas, 'Courier New';
-  line-height: 1.0em;
-  overflow-y: scroll;
-  overflow-x: hidden;
+    width: 100%;
+    height: 100%;
+    margin: 0% 0% 0% 0%;
+    padding: 0% 0% 0% 0%;
+    list-style: none;
+    background: #141414;
+    color: white;
+    font: 0.8em 'Andale Mono', Consolas, 'Courier New';
+    line-height: 1.0em;
+    overflow-y: scroll;
+    overflow-x: hidden;
 
-  -webkit-border-bottom-right-radius: 3px;
-  -webkit-border-bottom-left-radius: 3px;
-  -moz-border-radius-bottomright: 3px;
-  -moz-border-radius-bottomleft: 3px;
-  border-bottom-right-radius: 3px;
-  border-bottom-left-radius: 3px;
+
 }
 
+.bottom { visibility: hidden }
 
 .INFO    { font-weight: bold; color: white; }
 .WARNING { font-weight: bold; color: yellow; }
@@ -84,14 +75,18 @@
 
 </style>
 
+
 </head>
     <body>
-
-        <div class="shell-wrap">
-            <p class="shell-top-bar">{{USER}}@{{NAMESPACE}}.{{ROOM}}</p>
+        <div id="shell" class="shell-wrap">
+            <p id="top-bar" class="shell-top-bar">{{USER}}@{{ROOM}}.{{NAMESPACE}}</p>
             <div class="shell-body">
                 <ol id="log">
+{% for log in HISTORY.logs %}
+    <li class="{{log.severity}}">{{log.string}}</li>
+{% endfor %}
                 </ol>
+                <span id="bottom" class="bottom"/>
             </div>
         </div>
     </body>

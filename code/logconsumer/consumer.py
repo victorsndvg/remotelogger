@@ -5,7 +5,7 @@ import pika
 import json
 import socketio
 from remotelogger.sio import sio
-#from remotelogger.mongodb import client
+from remotelogger.mongo import Log
 from remotelogger.settings import BROKER_HOST, BROKER_PORT, BROKER_USER, BROKER_PASS
 
 LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
@@ -22,8 +22,10 @@ class Consumer(object):
         self._exchange_type = exchange_type
         self._queue         = queue
         self._routing_key   = routing_key
-        #self._db            = client[exchange][routing_key]
+        self._topic         = routing_key+'.'+queue
+        self._log           = Log(exchange, queue, routing_key, logger)
         self.logger         = logger
+        self._log.create()
 
     def connect(self):
         self.logger.info('Connecting to %s', BROKER_HOST)
@@ -95,9 +97,9 @@ class Consumer(object):
         self._channel.queue_declare(self.on_queue_declareok, queue_name)
 
     def on_queue_declareok(self, method_frame):
-        self.logger.info('Binding %s to %s with %s', self._exchange, self._queue, self._routing_key)
+        self.logger.info('Binding %s to %s with %s', self._exchange, self._queue, self._topic)
         self._channel.queue_bind(self.on_bindok, self._queue,
-                                 self._exchange, self._routing_key)
+                                 self._exchange, self._topic)
 
     def on_bindok(self, unused_frame):
         self.logger.info('Queue bound')
@@ -126,8 +128,8 @@ class Consumer(object):
     def on_message(self, unused_channel, basic_deliver, properties, body):
         self.logger.info('Received message # %s from %s: %s', basic_deliver.delivery_tag, properties.app_id, body)
         self.acknowledge_message(basic_deliver.delivery_tag)
+        self._log.append(json.loads(body.decode('utf-8')))
         sio.emit('log', {'data': body.decode('utf-8')}, namespace='/'+self._queue)
-        #self._db.insert_one(json.loads(body.decode('utf-8'))).inserted_id
 
     def acknowledge_message(self, delivery_tag):
         self.logger.info('Acknowledging message %s', delivery_tag)

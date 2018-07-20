@@ -1,0 +1,84 @@
+<html>
+    <head>
+        <title>RemoteLogger</title>
+        <style>
+html {
+    width: auto;
+    height: auto;
+    background-color: White;
+    display: block;
+    margin: 0% 0% 0% 0%;
+    padding: 0% 0% 0% 0%;
+    overflow-y: scroll; 
+}
+
+
+header {
+    width: 100%;
+    height: auto;
+    text-align: left;
+    display: block;
+    margin: 0% 0% 0% 0%;
+    padding: 0% 0% 0% 1%;
+    float: left;
+}
+
+header h1 {
+    float: left;
+    margin: 0% 0% 0% 0%;
+    padding: 0% 0% 0% 0%;
+}
+section {
+    width: auto;
+    height: auto;
+    background-color: #f3f3f3;
+    display: block;
+    margin: 1% 1% 1% 1%;
+    padding: 1% 1% 1% 1%;
+    border-radius: 0px;
+    box-shadow:2px 2px 2px #111;
+    float: left;
+}
+
+article {
+    width: auto;
+    height: auto;
+    background-color: #e7e7e7;
+    margin: 1% 1% 1% 1%;
+    padding: 1% 1% 1% 1%;
+    float: left;
+}
+
+.container {
+    position: relative;
+    float: left;
+}
+
+.link {
+  background-color: #111;
+  display: block;
+  color: white;
+  width: auto;
+  height: auto;
+  margin: 10px 10px 10px 10px;
+  padding: 10px 10px 10px 10px;
+  opacity: 0.5;
+  border-radius: 5px;
+  box-shadow:2px 2px 2px #111;
+}
+        </style>
+    </head>
+
+    <body>
+        <header id="header">
+           <h1>Workflows</h1>
+        </header>
+        <section id="users">
+            <article>
+                {% for workflow in WORKFLOWS %}
+                    <div class="container"><a class="link" href="{{ request.build_absolute_uri }}{{ object.get_absolute_url }}/{{workflow}}">{{workflow}}</a></div>
+                {% endfor %}
+            </article>
+        </section>
+    </body>
+</html>
