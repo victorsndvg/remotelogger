@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '&zn^5fkm+-n3s-^50kg$kts(cz8)s_54h!yky3+4kyns#(3!lx'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -131,8 +131,8 @@ BROKER_URL=BROKER_PROTOCOL+'://'+BROKER_USER+':'+BROKER_PASS+'@'+BROKER_HOST+':'
 STORAGE_PROTOCOL='mongodb'
 STORAGE_HOST='mongo'
 STORAGE_PORT='27017'
-STORAGE_USER='guest'
-STORAGE_PASS='guest'
+STORAGE_USER='root'
+STORAGE_PASS='example'
 STORAGE_URL=STORAGE_PROTOCOL+'://'+STORAGE_USER+':'+STORAGE_PASS+'@'+STORAGE_HOST+':'+STORAGE_PORT+'/'
 
 CELERY_BROKER_URL = BROKER_URL

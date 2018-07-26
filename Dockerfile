@@ -1,6 +1,8 @@
-FROM python:3.5  
-ENV PYTHONUNBUFFERED 1  
-ADD config/requirements.pip /config/  
-RUN pip install -r /config/requirements.pip  
-RUN mkdir /code;  
-WORKDIR /code  
+FROM python:3.5
+ENV PYTHONUNBUFFERED 1
+RUN useradd uwsgi
+RUN useradd celery
+RUN mkdir -p /code /config
+ADD config/requirements.pip /config/
+RUN pip install -r /config/requirements.pip
+WORKDIR /code

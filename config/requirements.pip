@@ -5,15 +5,7 @@ celery_singleton
 pika
 gevent==1.2.2
 gevent-websocket
-#greenlet
 python-engineio
 python-socketio
 pymongo
 social-auth-app-django
-#channels
-#Twisted[tls,http2]
-#daphne
-#gunicorn
-#websockets
-
-

@@ -1,0 +1,114 @@
+version: '2'  
+services:  
+  broker:
+    image: rabbitmq:3-management
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672"
+      - "8080:15672"
+
+#  db:
+#    image: postgres:latest
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+
+  nginx:
+    image: nginx:latest
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./code:/code
+      - ./config/nginx:/etc/nginx/conf.d
+    depends_on:
+      - web
+
+  web:
+    build: .
+    restart: always
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && uwsgi --http :8000 --http-websockets --gevent 1000 --master --ini uwsgi.ini"
+    depends_on:
+#      - db
+      - broker
+      - mongo
+    volumes:
+      - ./code:/code
+    ports:
+      - "80:8000"
+
+  mainworker:
+    build: .
+    restart: always
+    command: celery -A remotelogger worker --autoscale=10,3 -Q celery -l INFO -E --hostname=mainworker@%h -P gevent
+    depends_on:
+#      - db
+      - broker
+      - mongo
+    volumes:
+      - ./code:/code
+
+  consumerworker:
+    build: .
+    restart: always
+    command: celery -A remotelogger worker --autoscale=10,3 -Q consumer -l INFO -E --hostname=consumerworker@%h -P gevent
+    depends_on:
+#      - db
+      - broker
+      - mongo
+    volumes:
+      - ./code:/code
+
+  # Flower for RabbitMQ
+  monitor:
+    image: mher/flower:latest
+    restart: always
+    logging:
+      # limit logs retained on host to 25MB
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "50"
+    ports:
+      - "5555:5555"
+    entrypoint: "flower --broker=amqp://guest:guest@broker:5672 --port=5555 --basic_auth=admin:admin"
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=guest
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=guest
+
+  redis:
+    image: "redis:alpine"
+    restart: always
+
+#  redis-commander:
+#    image: rediscommander/redis-commander:latest
+#    restart: always
+#    environment:
+#      - REDIS_HOSTS=local:redis:6379
+#    ports:
+#      - 8081:8081
+
+#  redmon:
+#    image: vieux/redmon
+#    command: redmon -r redis://redis:6379
+#    restart: always
+#    links:
+#      - redis
+#    ports:
+#         - 4567:4567
+
+
+
