@@ -9,7 +9,7 @@ from gevent import monkey
 monkey.patch_all()
 
 basedir = os.path.dirname(os.path.realpath(__file__))
-sio = socketio.Server(client_manager=socketio.KombuManager(BROKER_URL), logger=True)
+sio = socketio.Server(client_manager=socketio.KombuManager(BROKER_URL), logger=False)
 
 @sio.on('my event', namespace='/test')
 def test_message(sid, message):
