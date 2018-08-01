@@ -3,6 +3,7 @@
     <head>
     <title>RemoteLogger</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script>
         var widthOfList = function(){
           var itemsWidth = 0;
@@ -53,7 +54,7 @@
     <style>
 html {
     width: 100%;
-    height: 95%;
+    height: 100%;
     background-color: White;
     display: block;
     margin: 0% 0% 0% 0%;
@@ -94,7 +95,7 @@ object {
     border: none;
     outline: none;
     cursor: pointer;
-    padding: 14px 16px;
+    padding: 0px 10px 0px 5px;
     transition: 0.3s;
     font-size: 17px;
 }
@@ -112,11 +113,10 @@ object {
 /* Style the tab content */
 .tabcontent {
     width: 100%;
-    height: 100%;
+    height: 90%;
     display: none;
-    padding: 6px 12px;
-    border: 1px solid #ccc;
-    border-top: none;
+    margin: 0% 0% 0% 0%;
+    padding: 0% 0% 0% 0%;
 }
         </style>
     </head>
@@ -124,6 +124,7 @@ object {
     <body>
 
         <div class="tab">
+            <button class="tablinks" onclick="reloadJobs()"><i class="fa fa-refresh"></i></button>
             {% for job in JOBS %}
             <button class="tablinks" onclick="showtab(event, '{{job}}')">{{job}}</button>
             {% endfor %}
@@ -138,19 +139,24 @@ object {
         {% endfor %}
 
         <script>
-        function showtab(evt, id) {
-            var i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tabcontent");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
+            function showtab(evt, id) {
+                var i, tabcontent, tablinks;
+                tabcontent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+                tablinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tablinks.length; i++) {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
+                document.getElementById(id).style.display = "block";
+                evt.currentTarget.className += " active";
             }
-            tablinks = document.getElementsByClassName("tablinks");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
+
+            function reloadJobs() {
+                location.reload(true);
             }
-            document.getElementById(id).style.display = "block";
-            evt.currentTarget.className += " active";
-        }
+
         </script>
          
     </body>
