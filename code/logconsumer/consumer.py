@@ -7,6 +7,7 @@ import socketio
 from remotelogger.sio import sio
 from remotelogger.mongo import Log
 from remotelogger.settings import BROKER_HOST, BROKER_PORT, BROKER_USER, BROKER_PASS
+from remotelogger.settings import CONSUMER_ENABLE_TIMEOUT, CONSUMER_TIMEOUT, CONSUMER_RESTART
 
 LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
               '-35s %(lineno) -5d: %(message)s')
@@ -46,14 +47,17 @@ class Consumer(object):
 
     def on_connection_closed(self, connection, reply_code, reply_text):
         self._channel = None
-#        if self._closing:
-#            self._connection.ioloop.stop()
-#        else:
-#            self.logger.warning('Connection closed, reopening in 5 seconds: (%s) %s',
-#                           reply_code, reply_text)
-#            self._connection.add_timeout(5, self.reconnect)
-        self.stop()
-
+        if CONSUMER_ENABLE_TIMEOUT:
+            if self._closing:
+                self._connection.ioloop.stop()
+            elif CONSUMER_RESTART:
+                self.logger.debug('Connection closed, reopening in 5 seconds: (%s) %s',
+                                   reply_code, reply_text)
+                self._connection.add_timeout(5, self.reconnect)
+            else:
+                self.stop()
+        else:
+            self.stop()
 
     def reconnect(self):
         # This is the old connection IOLoop instance, stop its ioloop
@@ -121,10 +125,6 @@ class Consumer(object):
         if self._channel:
             self._channel.close()
 
-#    async def show_message(self, uri, message):
-#        async with websockets.connect(uri) as websocket:
-#            await websocket.send(message)
-
     def on_message(self, unused_channel, basic_deliver, properties, body):
         self.logger.debug('Received message # %s from %s: %s', basic_deliver.delivery_tag, properties.app_id, body)
         self.acknowledge_message(basic_deliver.delivery_tag)
@@ -133,12 +133,14 @@ class Consumer(object):
 
     def acknowledge_message(self, delivery_tag):
         self.logger.debug('Acknowledging message %s', delivery_tag)
-        #if self._timerid:
-        #    self._closing = False
-        #    self._connection.remove_timeout(self._timerid)
+        if self._timerid:
+            self._closing = False
+            self._connection.remove_timeout(self._timerid)
         self._channel.basic_ack(delivery_tag)
-        #self._timerid = self._connection.add_timeout(60, self.close_channel)
-        #self._closing = True
+        if CONSUMER_ENABLE_TIMEOUT:
+            self._timerid = self._connection.add_timeout(CONSUMER_TIMEOUT, self.close_channel)
+            if not CONSUMER_RESTART:
+                self._closing = True
 
     def stop_consuming(self):
         if self._channel:

@@ -141,6 +141,10 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_BROKER_HEARTBEAT = 0
 
+CONSUMER_ENABLE_TIMEOUT = False
+CONSUMER_TIMEOUT = 3600
+CONSUMER_RESTART = False
+
 CELERY_ROUTES = {
     'logconsumer.tasks.serve': {
         'queue': 'subscribe',
