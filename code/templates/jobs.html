@@ -63,7 +63,7 @@
                 tablinks[i].className = tablinks[i].className.replace(" active", "");
             }
             document.getElementById(id).style.display = "block";
-            evt.currentTarget.className += " active";
+            if (!!evt) evt.currentTarget.className += " active";
         }
 
         function reloadJobs() {
@@ -152,17 +152,20 @@ object {
         </div>
 
         {% for job in JOBS %}
-        <div id="{{job}}" class="tabcontent">
-            <object type="text/html" data="{{ request.build_absolute_uri }}{{ object.get_absolute_url }}/{{job}}">
-                <p>Iframe not supported by your browser. {{job}} log cannot be shown.</p>
-            </object>
-        </div>
-        <script> showtab('{{job}}','{{job}}')</script>
+            <div id="{{job}}" class="tabcontent">
+                <object type="text/html" data="{{ request.build_absolute_uri }}{{ object.get_absolute_url }}/{{job}}">
+                    <p>Iframe not supported by your browser. {{job}} log cannot be shown.</p>
+                </object>
+            </div>
+            {% if forloop.last %}
+                <script> showtab(null,'{{job}}')</script>
+            {% endif %}
         {% empty %}
-        <div id="no-logs-yet">
-            <p align="center">No logs were published yet!</p>
-        </div>
+            <div id="no-logs-yet">
+                <p align="center">No logs were published yet!</p>
+            </div>
         {% endfor %}
 
     </body>
-</html>
+</html> 
+

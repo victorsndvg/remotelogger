@@ -4,20 +4,89 @@
     <script type="text/javascript" src="//code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.slim.js"></script>
     <script type="text/javascript" charset="utf-8">
+        function checkVerbosity(level) {
+            verbosity = localStorage.getItem('verbosity') || document.getElementById("verbosity").value;
+            if(level == null || typeof level != 'number') level = 0;
+            return verbosity >= level;
+        };
+
+        function updateProgress(value) {
+            var progressbar = document.getElementById('progress-bar');
+            var max = progressbar.getAttribute("max");
+            if (max == null) progressbar.setAttribute("max", 100);
+            if (!!value) {
+                if(value.toString().startsWith("+")) {
+                    var current = progressbar.getAttribute("value") || 0;
+                    progressbar.setAttribute("value", parseInt(current)+parseInt(value));
+
+                } else {
+                    progressbar.setAttribute("value", value);
+                };
+            };
+        };
+
+        function updateMaxProgress(max) {
+            var progressbar = document.getElementById('progress-bar');
+            if (!!max) progressbar.setAttribute("max", max);
+        };
+
+        function appendLog(string, verbosity, severity) {
+            if(checkVerbosity(verbosity)){
+                $('#log').append('<li class="' + severity + '"><pre>' + string + '</pre></li>');
+            };
+        };
+
+        function update(logmsg) {
+            verbosity = 0;
+            severity = '';
+            if(logmsg.hasOwnProperty('verbosity')) verbosity = logmsg.verbosity;
+            if(logmsg.hasOwnProperty('severity')) severity = logmsg.severity;
+
+            appendLog(logmsg.string, verbosity, severity);
+
+            if(logmsg.hasOwnProperty('progress')){
+                updateProgress(logmsg.progress);
+            };
+            if(logmsg.hasOwnProperty('maxprogress')){
+                updateMaxProgress(logmsg.maxprogress);
+            };
+            document.getElementById( 'bottom' ).scrollIntoView();
+        };
+
+        function updateHistory(history) {
+           var ahistory = JSON.parse(history.data)
+           for(var logmsg in ahistory.logs) {
+                update(JSON.dumps(logmsg));
+           }
+        };
+
+        function verbosityChange() {
+            stored_verbosity = localStorage.getItem('verbosity')
+            current_verbosity = $('#verbosity').val()
+
+            $('#verbosity').val(stored_verbosity);
+            localStorage.setItem('verbosity',current_verbosity );
+
+            if(current_verbosity != stored_verbosity) location.reload();
+        };
+
         $(document).ready(function(){
             var socket = io.connect('http://' + document.domain + ':' + location.port + '/{{NAMESPACE}}');
 
             socket.on('connect', function() {
                 $('#top-bar').append(' | Connected');
             });
+
             socket.on('disconnect', function() {
                 $('#top-bar').append(' | Disconnected');
             });
+
             socket.on('log', function(msg) {
                 var logmsg = JSON.parse(msg.data)
-                $('#log').append('<li class="' + logmsg.severity + '">' + logmsg.string + '</li>');
-                document.getElementById( 'bottom' ).scrollIntoView();
+                update(logmsg);
             });
+
+            if(localStorage.getItem('verbosity')) document.getElementById("verbosity").options[localStorage.getItem('verbosity')].selected = true;
         });
     </script>
     <style>
@@ -41,12 +110,19 @@ body {
     padding: 0% 0% 0% 0%;
 }
 
-ol {
+ul  {
+    list-style: none;
+}
+
+pre {
+    margin: 0% 0% 0% 0%;
+    padding: 0% 0% 0% 0%;
+}
+
+.progress {
+    height: 0.5em;
     width: 100%;
-    height: 100%;
-    display: block;
-    list-style-type: decimal;
-    margin: 0% 0% 0% 50px;
+    margin: 0% 0% 0% 0%;
     padding: 0% 0% 0% 0%;
 }
 
@@ -63,19 +139,28 @@ ol {
     color: #525252;
     margin: 0% 0% 0% 0%;
     padding: 0% 0% 0% 0%;
+    height: 1.5em;
+    width: 85%;
     text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
     font-size: 0.85em;
+    float: left;
 
+    background: #f7f7f7; /* Old browsers */
+    background: -moz-linear-gradient(top,  #f7f7f7 0%, #B8B8B8 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f7f7f7), color-stop(100%,#B8B8B8)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #f7f7f7 0%,#B8B8B8 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #f7f7f7 0%,#B8B8B8 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #f7f7f7 0%,#B8B8B8 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #f7f7f7 0%,#B8B8B8 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f7f7f7', endColorstr='#B8B8B8',GradientType=0 ); /* IE6-9 */
+}
 
-
-  background: #f7f7f7; /* Old browsers */
-  background: -moz-linear-gradient(top,  #f7f7f7 0%, #B8B8B8 100%); /* FF3.6+ */
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f7f7f7), color-stop(100%,#B8B8B8)); /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(top,  #f7f7f7 0%,#B8B8B8 100%); /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(top,  #f7f7f7 0%,#B8B8B8 100%); /* Opera 11.10+ */
-  background: -ms-linear-gradient(top,  #f7f7f7 0%,#B8B8B8 100%); /* IE10+ */
-  background: linear-gradient(to bottom,  #f7f7f7 0%,#B8B8B8 100%); /* W3C */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f7f7f7', endColorstr='#B8B8B8',GradientType=0 ); /* IE6-9 */
+.verbosity-level {
+    height: 1.5em;
+    width: 15%;
+    margin: 0% 0% 0% 0%;
+    padding: 0% 0% 0% 0%;
+    float: right;
 }
 
 .shell-body {
@@ -102,22 +187,37 @@ ol {
 .WARNING { font-weight: bold; color: yellow; }
 .DEBUG   { font-weight: bold; color: orange; }
 .ERROR   { font-weight: bold; color: red; }
+.CRITICAL{ font-weight: bold; color: red; }
+.OK      { font-weight: bold; color: green; }
 
 </style>
 
 
 </head>
     <body>
+
         <div id="shell" class="shell-wrap">
-            <p id="top-bar" class="shell-top-bar">{{USER}}@{{ROOM}}.{{NAMESPACE}}</p>
+            <p id="top-bar" class="shell-top-bar">{{USER}}@{{ROOM}}.{{NAMESPACE}} </p>
+            <select name="verbosity" id="verbosity" class="shell-top-bar verbosity-level" onchange="verbosityChange()">
+                <optgroup label="Verbosity">
+                    <option value="0">Normal</option> 
+                    <option value="1">Verbose</option>
+                    <option value="2">Debug</option> 
+                </optgroup>
+            </select> 
+            <progress id="progress-bar" class="progress"></progress>
             <div class="shell-body">
-                <ol id="log">
-{% for log in HISTORY.logs %}
-    <li class="{{log.severity}}">{{log.string}}</li>
-{% endfor %}
-                </ol>
+                <ul id="log">
+                </ul>
                 <span id="bottom" class="bottom"/>
             </div>
         </div>
+
+        <script>
+        {% for log in HISTORY.logs %}
+            appendLog("{{log.string}} ",{%if 'verbosity' in log and log.verbosity %} {{log.verbosity}} {% else %} 0 {% endif %}, {% if 'severity' in log and log.severity%} "{{log.severity}}" {% else %} "" {% endif %});{% if 'progress' in log and log.progress %}updateProgress("{{log.progress}}");{% endif %}{% if 'maxprogress' in log and log.maxprogress %}updateMaxProgress({{log.maxprogress}});{% endif %} {% endfor %}
+        document.getElementById( 'bottom' ).scrollIntoView();
+        </script>
+
     </body>
 </html>
