@@ -51,13 +51,14 @@ class Consumer(object):
             if self._closing:
                 self._connection.ioloop.stop()
             elif CONSUMER_RESTART:
-                self.logger.debug('Connection closed, reopening in 5 seconds: (%s) %s',
-                                   reply_code, reply_text)
-                self._connection.add_timeout(5, self.reconnect)
+                self.logger.warning('Connection closed, reopening in 1 second: (%s) %s',
+                               reply_code, reply_text)
+                self._connection.add_timeout(1, self.reconnect)
             else:
                 self.stop()
         else:
             self.stop()
+
 
     def reconnect(self):
         # This is the old connection IOLoop instance, stop its ioloop
@@ -114,7 +115,6 @@ class Consumer(object):
         self.add_on_cancel_callback()
         self._consumer_tag = self._channel.basic_consume(consumer_callback=self.on_message,
                                                          queue=self._queue)
-
     def add_on_cancel_callback(self):
         self.logger.debug('Adding consumer cancellation callback')
         self._channel.add_on_cancel_callback(self.on_consumer_cancelled)
@@ -151,6 +151,7 @@ class Consumer(object):
         self.logger.debug('RabbitMQ acknowledged the cancellation of the consumer')
         self.close_channel()
 
+
     def close_channel(self):
         self.logger.debug('Closing the channel')
         self._channel.close()
@@ -165,6 +166,7 @@ class Consumer(object):
         self.stop_consuming()
         self._connection.ioloop.stop()
         #self._sio.disconnect(sid, namespace='/logs/logs')
+        self._log.close()
         self.logger.debug('Stopped')
 
     def close_connection(self):
