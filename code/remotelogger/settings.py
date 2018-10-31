@@ -27,7 +27,6 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -50,6 +49,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 ROOT_URLCONF = 'remotelogger.urls'
 
@@ -142,7 +143,7 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_BROKER_HEARTBEAT = 0
 
 CONSUMER_ENABLE_TIMEOUT = False
-CONSUMER_TIMEOUT = 3600
+CONSUMER_TIMEOUT = 60
 CONSUMER_RESTART = False
 
 CELERY_ROUTES = {

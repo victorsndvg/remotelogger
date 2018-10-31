@@ -11,6 +11,9 @@ class Log(object):
         self._info          = {"exchange":exchange, "queue":queue, "routing_key": routing_key}
         self._client        = MongoClient(STORAGE_URL)
         self._collection    = self._client[exchange][routing_key]
+        self.buffer         = []
+        self.buffer_size    = 1
+        self.counter        = 0
         self.logger         = logger
 
     def create(self):
@@ -22,11 +25,30 @@ class Log(object):
             
     def append(self, value):
         self.logger.debug('Storing {%s} to %s', value, str(self._info))
-        self._collection.update_one(self._info, {"$push": {"logs":value} })
+        self.buffer.append(value)
+        self.counter += 1
+        try:
+            if len(self.buffer) >= self.buffer_size:
+                self.logger.debug('Storing {%s} vaues to %s', str(self.size), str(self._info))
+                self._collection.update(self._info, {"$push": {"logs": {"$each": self.buffer} } })
+                self.buffer = []
+                self.buffer_size = self.counter.bit_length()**2
+        except Exception as ex:
+            print(str(ex))
+#        self._collection.update_one(self._info, {"$push": {"logs":value} })
 
     def get(self):
         log = self._collection.find_one(self._info)
         return log
+
+    def close(self):
+        if self.buffer:
+            self._collection.update_one(self._info, {"$pushAll": {"logs":self.buffer} })
+            self.buffer = []
+
+    def __del__(self):
+         self.close()
+
 
 class StorageInfo(object):
 
