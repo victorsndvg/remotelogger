@@ -29,7 +29,7 @@ class Log(object):
         self.counter += 1
         try:
             if len(self.buffer) >= self.buffer_size:
-                self.logger.debug('Storing {%s} vaues to %s', str(self.size), str(self._info))
+                self.logger.debug('Storing {%s} vaues to %s', str(self.buffer_size), str(self._info))
                 self._collection.update(self._info, {"$push": {"logs": {"$each": self.buffer} } })
                 self.buffer = []
                 self.buffer_size = self.counter.bit_length()**2
@@ -43,7 +43,7 @@ class Log(object):
 
     def close(self):
         if self.buffer:
-            self._collection.update_one(self._info, {"$pushAll": {"logs":self.buffer} })
+            self._collection.update(self._info, {"$push": {"logs": {"$each": self.buffer} } })
             self.buffer = []
 
     def __del__(self):
